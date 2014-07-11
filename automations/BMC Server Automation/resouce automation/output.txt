@@ -1,0 +1,23 @@
+{"PropertySetClassChildrenResponse"=>{"PropertySetClassChildren"=>{"PropertySetClasses"=>{"totalCount"=>"0",
+"Elements"=>[]}, "PropertySetInstances"=>{"totalCount"=>"2", "Elements"=>[{"name"=>"Tomcat",
+"description"=>"Blueprint", "type"=>"/type/PropertySetClasses/SystemObject/Component Template",
+"dbKey"=>"DBKey:STemplateModelKeyImpl:264-16-2059519",
+"objectId"=>"c2c2ac8e-3ed9-4bd0-a237-50d7b0cc46fb", "uri"=>"/id/SystemObject/Component
+Template/c2c2ac8e-3ed9-4bd0-a237-50d7b0cc46fb", "modelType"=>"TEMPLATE", "modelTypeId"=>"250",
+"PropertyValues"=>{"totalCount"=>"1", "Elements"=>[{"name"=>"NAME", "type"=>"String",
+"uri"=>"/id/SystemObject/Component
+Template/c2c2ac8e-3ed9-4bd0-a237-50d7b0cc46fb/PropertyValues/NAME", "value"=>"Tomcat"}]}},
+{"name"=>"MySQL", "description"=>"Blueprint",
+"type"=>"/type/PropertySetClasses/SystemObject/Component Template",
+"dbKey"=>"DBKey:STemplateModelKeyImpl:274-5-2064521",
+"objectId"=>"d517403e-e955-4aed-a072-855a724afb82", "uri"=>"/id/SystemObject/Component
+Template/d517403e-e955-4aed-a072-855a724afb82", "modelType"=>"TEMPLATE", "modelTypeId"=>"250",
+"PropertyValues"=>{"totalCount"=>"1", "Elements"=>[{"name"=>"NAME", "type"=>"String",
+"uri"=>"/id/SystemObject/Component
+Template/d517403e-e955-4aed-a072-855a724afb82/PropertyValues/NAME", "value"=>"MySQL"}]}}]},
+"Groups"=>{"totalCount"=>"0", "Elements"=>[]}}}}
+
+https://bl-appserver:9843/group/Components/DEV-WEBAPP/?username=BLAdmin&password=password&role=BLAdmins&BQUERY=SELECT * FROM "SystemObject/Component" WHERE TEMPLATE.NAME equals "Tomcat"
+
+When executing a deploy job, get the package local property and propose mapping with component props or leave it with default value.
+For the creation of the deploy job from the generated blpackage, default is automapped.
