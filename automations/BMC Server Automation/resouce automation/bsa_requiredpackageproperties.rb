@@ -33,7 +33,7 @@ def execute(script_params, parent_id, offset, max_records)
 		raise "Component group #{script_params["SS_environment"]} with description set to Environment cannot be found in BSA." if result.nil?
 		targets = [[result["groupId"], result["objectId"], result["modelType"]]]
 	else
-		targets = [params["Target_Environment"].split('|')]
+		targets = [script_params["Target_Environment"].split('|')]
 	end 
 	if script_params["Target_Blueprint"]
 		if script_params["Target_Blueprint"] == "rpm{Blueprint}"
