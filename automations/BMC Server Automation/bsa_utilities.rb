@@ -412,6 +412,93 @@ module BsaUtilities
       nil
     end
 
+	def get_server_details_from_name(bsa_base_url, bsa_username, bsa_password, bsa_role,server)
+      url = "#{bsa_base_url}/query"
+      url += "?username=#{bsa_username}&password=#{bsa_password}&role=#{bsa_role}"
+      url += "&BQUERY=SELECT NAME FROM \"SystemObject/Server\" WHERE NAME equals \"#{server}\""
+
+      response = RestClient.get URI.escape(url), :accept => :json 
+      parsed_response = JSON.parse(response)
+
+      if parsed_response.has_key? "ErrorResponse"
+        raise "Error: while query URL #{url}: #{parsed_response["ErrorResponse"]["Error"]}"
+      end
+
+	  return parsed_response["PropertySetClassChildrenResponse"]["PropertySetClassChildren"]["PropertySetInstances"]["Elements"][0] rescue nil
+
+	end
+	
+	def get_package_action_dbkey(bsa_base_url, bsa_username, bsa_password, bsa_role,actionpath,osname="")
+	  urlos = "#{bsa_base_url}/group/Depot#{actionpath}-#{osname}?username=#{bsa_username}&password=#{bsa_password}&role=#{bsa_role}"
+	  urlgen = "#{bsa_base_url}/group/Depot#{actionpath}-Unix?username=#{bsa_username}&password=#{bsa_password}&role=#{bsa_role}"
+	  group = File.dirname(actionpath)
+	  pkg = File.basename(actionpath)
+	  urlno = "#{bsa_base_url}/group/Depot#{group}/?username=#{bsa_username}&password=#{bsa_password}&role=#{bsa_role}"
+	  urlno += "&bquery=select name from \"SystemObject/Depot Object\" WHERE name \"starts with\" \"#{pkg}\""
+	  response = RestClient.get URI.escape(urlos), :accept => :json 
+	  parsed_response = JSON.parse(response)
+      dbKey = parsed_response["PropertySetInstanceResponse"]["PropertySetInstance"]["dbKey"] rescue nil
+	  if dbKey.nil? && (! osname.empty?) && (osname != "Windows")
+	    response = RestClient.get URI.escape(urlgen), :accept => :json 
+		parsed_response = JSON.parse(response)
+		dbKey = parsed_response["PropertySetInstanceResponse"]["PropertySetInstance"]["dbKey"] rescue nil
+		raise "The blpackage #{actionpath} is either not define for #{osname} or for Unix" if dbKey.nil?
+	  else 
+	    response = RestClient.get URI.escape(urlno), :accept => :json 
+        parsed_response = JSON.parse(response)
+	    dbKey = parsed_response["GroupChildrenResponse"]["GroupChildren"]["PropertySetInstances"]["Elements"][0]["dbKey"] rescue nil
+		raise "The blpackage #{actionpath} do not exist" if dbKey.nil?
+	  end
+	  return dbKey
+	end
+
+	def get_server_list_from_multiselect(bsa_base_url, bsa_username, bsa_password, bsa_role, multiselect, maxserver=nil, list={ "Linux" => [], "Windows" => [], "Solaris" => [], "AIX" => [], "HP-UX" => [] })
+	  multiselect.each do |elt|
+	    case elt[2]
+		  when "STATIC_SERVER_GROUP"
+		    url = "#{bsa_base_url}/id/SystemObject/Static Group/Static Server Group/#{elt[1]}/?username=#{bsa_username}&password=#{bsa_password}&role=#{bsa_role}"
+		  when "SMART_SERVER_GROUP"
+		    url = "#{bsa_base_url}/id/SystemObject/Smart Group/#{elt[1]}/?username=#{bsa_username}&password=#{bsa_password}&role=#{bsa_role}"
+		  else
+		    url = "#{bsa_base_url}/id/SystemObject/Server/#{elt[1]}/PropertyValues/OS?username=#{bsa_username}&password=#{bsa_password}&role=#{bsa_role}"
+		end
+		response = RestClient.get URI.escape(url), :accept => :json 
+		parsed_response = JSON.parse(response)
+		if parsed_response.has_key? "ErrorResponse"
+			raise "Error while query URL #{url}: #{parsed_response["ErrorResponse"]["Error"]}"
+		end
+		groups = parsed_response["GroupChildrenResponse"]["GroupChildren"]["Groups"]["Elements"] rescue nil
+		if groups
+		  data = []
+		  groups.each do |group|
+			data << [group["groupId"],group["objectId"],group["modelType"]]
+		  end
+		  list = get_server_list_from_multiselect(bsa_base_url, bsa_username, bsa_password, bsa_role, data, maxserver, list) unless data.empty?
+		end
+		servers = parsed_response["GroupChildrenResponse"]["GroupChildren"]["PropertySetInstances"]["Elements"] rescue nil
+		if servers
+		  data = []
+		  servers.each do |object|
+		    data << [object["name"],object["objectId"],"SERVER",object["dbKey"]]
+		    unless maxserver.nil? 
+			  maxserver = maxserver - 1 
+		    end
+		    list = get_server_list_from_multiselect(bsa_base_url, bsa_username, bsa_password, bsa_role, data, maxserver, list) if ( ! maxserver.nil? ) && ( maxserver <= 0 )
+		  end
+		  list = get_server_list_from_multiselect(bsa_base_url, bsa_username, bsa_password, bsa_role, data, maxserver, list) unless data.empty?
+		end
+		osname = parsed_response["PropertyValueResponse"]["PropertyValue"]["value"] rescue nil
+		if osname
+		  list[osname] << elt[0]
+		  list[osname] = list[osname].uniq
+		  unless maxserver.nil? 
+			maxserver = maxserver - 1 
+		  end
+		end
+	  end
+	  return list
+	end
+	
 	def get_component_list_from_multiselect(bsa_base_url, bsa_username, bsa_password, bsa_role, multiselect, template="", maxcomponent=nil)
 	  list = []
 	  multiselect.each do |elt|
@@ -611,6 +698,24 @@ module BsaUtilities
 			end
 		end
 		return []	
+	end
+	
+	def get_template_dbkey_from_name(bsa_base_url, bsa_username, bsa_password, bsa_role,template)
+	  url = "#{bsa_base_url}/query"
+      url += "?username=#{bsa_username}&password=#{bsa_password}&role=#{bsa_role}"
+	  url += "&BQUERY=SELECT NAME FROM \"SystemObject/Component Template\" WHERE NAME equals \"#{template}\""
+
+      response = RestClient.get URI.escape(url), :accept => :json 
+      parsed_response = JSON.parse(response)
+
+      if parsed_response.has_key? "ErrorResponse"
+        raise "Error: while query URL #{url}: #{parsed_response["ErrorResponse"]["Error"]}"
+      end
+
+	  dbkey = parsed_response["PropertySetClassChildrenResponse"]["PropertySetClassChildren"]["PropertySetInstances"]["Elements"][0]["dbKey"] rescue nil
+      raise "Error: Could not find sever #{server}." if dbkey.nil?
+      
+      return dbkey
 	end
 	
 	def get_server_dbkey_from_name(bsa_base_url, bsa_username, bsa_password, bsa_role,server)
@@ -819,7 +924,7 @@ module BsaUtilities
 		execute_job(bsa_base_url, bsa_username, bsa_password, bsa_role, job_url)
 	end
 	
-    def bsa_soap_create_blpackage_deploy_job(bsa_base_url, session_id, job_folder_id, job_name, package_db_key, targets)
+    def bsa_soap_create_blpackage_deploy_job(bsa_base_url, session_id, job_folder_id, job_name, package_db_key, targets,iSimulateEnabled=true, isStageIndirect=false)
       if targets.nil? || targets.empty?
         raise "Atleast one target needs to be specified while creating a blpackage deploy job"
       end
@@ -831,9 +936,9 @@ module BsaUtilities
                     package_db_key,                 #packageKey
                     1,                              #deployType (0 = BASIC, 1 = ADVANCED)
                     targets.first,                  #serverName
-                    true,                           #isSimulateEnabled
+                    iSimulateEnabled,                           #isSimulateEnabled
                     true,                           #isCommitEnabled
-                    false,                          #isStagedIndirect
+                    isStageIndirect,                #isStagedIndirect
                     2,                              #logLevel (0 = ERRORS, 1 = ERRORS_AND_WARNINGS, 2 = ALL_INFO)
                     true,                           #isExecuteByPhase
                     false,                          #isResetOnFailure
