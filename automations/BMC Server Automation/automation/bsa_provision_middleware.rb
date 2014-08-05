@@ -95,7 +95,13 @@ if not params["Service_Name"].blank?
       bquery = "SELECT * FROM \"SystemObject/Static Group/Smart Component Group\" WHERE (NAME equals \"#{params["SS_environment"]}\") AND (DESCRIPTION equals \"Environment\")"
       result = BsaUtilities.get_element_systemobject(BSA_BASE_URL, BSA_USERNAME, BSA_PASSWORD, BSA_ROLE, bquery)[0] rescue nil
     end
-    raise "Component group #{params["SS_environment"]} with description set to Environment cannot be found in BSA." if result.nil?
+	if result.nil?
+	  gpcpId = BsaUtilities.bsa_soap_execute_cli_command_by_param_list(BSA_BASE_URL,session_id,"Group","createGroupPath",[5014,"/#{params["SS_environment"]}"])[:return_value].split(';')[0].split('=')[1].strip rescue nil
+	  raise "Can not create component group #{params["SS_environment"]}." if gpcpId.nil?
+	  bquery = "SELECT * FROM \"SystemObject/Static Group/Static Component Group\" WHERE NAME equals \"#{params["SS_environment"]}\""
+	  result = BsaUtilities.get_element_systemobject(BSA_BASE_URL, BSA_USERNAME, BSA_PASSWORD, BSA_ROLE, bquery)[0]
+	  aux = BsaUtilities.bsa_soap_execute_cli_command_by_param_list(BSA_BASE_URL,session_id,"Group","setDescription",[result["groupId"],"Environment"])
+	end
     envSelected = [[result["groupId"], result["objectId"], result["modelType"]]]
   else
     envSelected = [params["Target_Environment"].split('|')]
