@@ -116,7 +116,7 @@ params["Targets"].split(',').each do |elt|
     params["servers"].split(',').each do |serv|
 	  servdetails = BsaUtilities.get_server_details_from_name(BSA_BASE_URL, BSA_USERNAME, BSA_PASSWORD, BSA_ROLE,serv)
 	  raise "Server #{serv} is not registered in BSA" if servdetails.nil?
-	  servSelect << [serv,servdetails["ObjectId"],"SERVER",servdetails["dbKey"]]
+	  servSelected << [serv,servdetails["objectId"],"SERVER",servdetails["dbKey"]]
 	end
   else
     servSelected << aux
@@ -215,7 +215,7 @@ servSelected.each do |osname,targets|
 		  propvalue = params[property] if params.has_key?(property)
 		  propvalue = actionparams[property] if actionparams.has_key?(property) 
 		  unless propvalue.nil?
-		    result = BsaUtilities.bsa_soap_execute_cli_command_by_param_list(BSA_BASE_URL,session_id,"Component","setPropertyValue",[compDBKey,property,propvalue]) 
+		    compDBKey = BsaUtilities.bsa_soap_execute_cli_command_by_param_list(BSA_BASE_URL,session_id,"Component","setPropertyValue",[compDBKey,property,propvalue])[:return_value]
 			message += "Set property #{property} to #{propvalue}/n"
 		  end
 		end

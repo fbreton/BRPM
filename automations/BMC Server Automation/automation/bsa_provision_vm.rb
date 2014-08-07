@@ -194,7 +194,7 @@ if (execution_status == "OK")
   servers = "name, environment\n"
   servers += "#{hostname}, #{params["SS_environment"]}\n"
   set_server_flag(servers)
-  write-to("Server #{hostname} has been well provisioned")
+  write_to("Server #{hostname} has been well provisioned")
 else
   wriet_to("Error: #{execution_status}")
 end 

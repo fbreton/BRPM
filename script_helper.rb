@@ -38,8 +38,10 @@ def encrypt(val)
 end  
 
 def sub_tokens(script_params,var_string)
+  
   prop_val = var_string.match('rpm{[^{}]*}')
   while ! prop_val.nil? do
+    raise "Property #{prop_val[0][4..-2]} do not exist" if script_params[prop_val[0][4..-2]].nil?
     var_string = var_string.sub(prop_val[0],script_params[prop_val[0][4..-2]])
     prop_val = var_string.match('rpm{[^{}]*}')
   end
