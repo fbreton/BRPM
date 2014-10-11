@@ -215,13 +215,13 @@ servSelected.each do |osname,targets|
 		  propvalue = params[property] if params.has_key?(property)
 		  propvalue = actionparams[property] if actionparams.has_key?(property) 
 		  unless propvalue.nil?
-		    compDBKey = BsaUtilities.bsa_soap_execute_cli_command_by_param_list(BSA_BASE_URL,session_id,"Component","setPropertyValue",[compDBKey,property,propvalue])[:return_value]
+		    compDBKey = BsaUtilities.bsa_soap_execute_cli_command_by_param_list(BSA_BASE_URL,session_id,"Component","setPropertyValue",[compDBKey,property,propvalue])[:return_value] 
 			message += "Set property #{property} to #{propvalue}/n"
 		  end
 		end
 		# add component to env if needed
 		unless params["Service_Name"].blank?
-		  envPath = BsaUtilities.bsa_soap_execute_cli_command_by_param_list(BSA_BASE_URL,session_id,"Group","getAQualifiedGroupName",5014,envSelected[0][0]])[:return_value]
+		  envPath = BsaUtilities.bsa_soap_execute_cli_command_by_param_list(BSA_BASE_URL,session_id,"Group","getAQualifiedGroupName",[5014,envSelected[0][0]])[:return_value]
 		  groupDBKey = BsaUtilities.bsa_soap_execute_cli_command_by_param_list(BSA_BASE_URL,session_id,"StaticComponentGroup","addComponentToComponentGroupByGroupAndDBKey",[envPath,compDBKey])[:return_value]
 		  message += "Added to env #{envPath}/n"
 		end
@@ -232,5 +232,3 @@ servSelected.each do |osname,targets|
 end
 
 puts(message)
-
-
