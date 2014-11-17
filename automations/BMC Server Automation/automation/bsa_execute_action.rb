@@ -1,13 +1,13 @@
 ###
 # Target_Environment:
 #   name: Target Environment
-#   position: A1:C1
+#   position: D1:F1
 #   type: in-external-single-select
 #   external_resource: bsa_getenvironment
 #   required: yes
 # Target_Blueprint:
 #   name: Target Blueprint
-#   position: D1:F1
+#   position: A1:C1
 #   type: in-external-single-select
 #   external_resource: bsa_targetblueprint
 #   required: yes
