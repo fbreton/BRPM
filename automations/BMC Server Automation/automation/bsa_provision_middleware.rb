@@ -1,12 +1,12 @@
 ###
 # Target_Environment:
 #   name: Environment
-#   position: A1:C1
+#   position: D1:F1
 #   type: in-external-single-select
 #   external_resource: bsa_getenvironment
 # Target_Blueprint:
 #   name: Blueprint
-#   position: D1:F1
+#   position: A1:C1
 #   type: in-external-single-select
 #   external_resource: bsa_targetblueprint
 # Action:

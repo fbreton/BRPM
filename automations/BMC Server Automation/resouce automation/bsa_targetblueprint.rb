@@ -10,7 +10,7 @@ BSA_BASE_URL = SS_integration_dns
 
 def execute(script_params, parent_id, offset, max_records)
 
-	data = [{"Select" => ''},{"Value from component property Blueprint" => "rpm{Blueprint}"}]
+	data = [{"Select" => 'Generic'},{"Value from component property Blueprint" => "rpm{Blueprint}"}]
 	bquery = 'SELECT * FROM "SystemObject/Component Template" WHERE DESCRIPTION equals "Blueprint"'
 	BsaUtilities.get_element_systemobject(BSA_BASE_URL, BSA_USERNAME, BSA_PASSWORD, BSA_ROLE,bquery).each do |elt|
 		data << {elt["name"] => elt["name"]}

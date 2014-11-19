@@ -17,9 +17,7 @@ ROOT_FOLDER = "/BRPM/Provisioning"
 
 def execute(script_params, parent_id, offset, max_records)
 	blueprint = script_params["Target_Blueprint"]
-	if blueprint.blank?
-	  actionfolder = BsaUtilities.get_root_group(BSA_BASE_URL, BSA_USERNAME, BSA_PASSWORD, BSA_ROLE, "DEPOT_GROUP","#{ROOT_FOLDER}/Generic")
-	elsif blueprint == "rpm{Blueprint}"
+	if blueprint == "rpm{Blueprint}"
 	  actionfolder = BsaUtilities.get_root_group(BSA_BASE_URL, BSA_USERNAME, BSA_PASSWORD, BSA_ROLE, "DEPOT_GROUP","#{ROOT_FOLDER}/#{script_params["Blueprint"]}")
 	else
 	  actionfolder = BsaUtilities.get_root_group(BSA_BASE_URL, BSA_USERNAME, BSA_PASSWORD, BSA_ROLE, "DEPOT_GROUP","#{ROOT_FOLDER}/#{blueprint}")
